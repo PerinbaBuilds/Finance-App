@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'config/supabase_config.dart';
 import 'services/auth_service.dart';
 import 'services/finance_service.dart';
@@ -133,29 +134,69 @@ class _AuthGateState extends State<_AuthGate> {
     if (_isRecovery) return const ResetPasswordScreen();
 
     if (!_initialized) {
-      return const Scaffold(
-        backgroundColor: AppTheme.background,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.account_balance_wallet,
-                  size: 64, color: AppTheme.navy),
-              SizedBox(height: 16),
-              CircularProgressIndicator(color: AppTheme.navy),
-              SizedBox(height: 16),
-              Text('Finance Tracker',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
-            ],
-          ),
-        ),
-      );
+      return const _SplashScreen();
     }
 
     final auth = context.watch<AuthService>();
     return auth.isLoggedIn ? const HomeScreen() : const LoginScreen();
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                gradient: AppTheme.greenAccentGradient,
+                borderRadius: BorderRadius.circular(26),
+                boxShadow: AppTheme.ambientGlow(AppTheme.primary),
+              ),
+              child: const Icon(Icons.account_balance_wallet_rounded,
+                  size: 42, color: Colors.white),
+            )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scaleXY(begin: 1.0, end: 1.06, duration: 1100.ms, curve: AppTheme.motionCurve),
+            const SizedBox(height: 28),
+            const Text(
+              'Finance Tracker',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Loading your dashboard…',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppTheme.textPrimary.withValues(alpha: 0.55),
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                color: AppTheme.primary,
+                strokeWidth: 3,
+                backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
+              ),
+            ),
+          ],
+        ).animate().fadeIn(duration: 400.ms),
+      ),
+    );
   }
 }
