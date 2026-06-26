@@ -251,10 +251,9 @@ class _DashboardHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final monthLabel = DateFormat('MMMM yyyy').format(now);
-    final percent = finance.totalMonthlyBudget == 0
+    final rawPercent = finance.totalMonthlyBudget == 0
         ? 0.0
-        : (finance.totalActualSpent / finance.totalMonthlyBudget)
-            .clamp(0.0, 1.0);
+        : finance.totalActualSpent / finance.totalMonthlyBudget;
     final isOver = finance.isOverBudget;
     final remaining = finance.totalVariance;
     final sym = finance.currencySymbol;
@@ -405,15 +404,16 @@ class _DashboardHeader extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              // Progress bar with glow effect
+              // Progress bar with glow effect — overflows visibly once over budget
               TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: percent),
+                tween: Tween(begin: 0, end: rawPercent),
                 duration: const Duration(milliseconds: 900),
                 curve: AppTheme.motionCurve,
                 builder: (_, v, __) {
                   final barColor = isOver
                       ? AppTheme.rose
                       : AppTheme.emerald;
+                  final fillWidth = v.clamp(0.0, 1.0);
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -423,12 +423,16 @@ class _DashboardHeader extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3)),
+                            color: isOver
+                                ? AppTheme.rose.withValues(alpha: 0.6)
+                                : Colors.white.withValues(alpha: 0.3),
+                            width: isOver ? 1.5 : 1,
+                          ),
                         ),
                         child: Stack(
                           children: [
                             FractionallySizedBox(
-                              widthFactor: v,
+                              widthFactor: fillWidth,
                               child: Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -445,16 +449,52 @@ class _DashboardHeader extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                child: isOver
+                                    ? const ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.all(Radius.circular(6)),
+                                        child: _OverflowStripes(),
+                                      )
+                                    : null,
                               ),
-                            ),
+                            )
+                                .animate(
+                                  onPlay: (c) =>
+                                      isOver ? c.repeat(reverse: true) : null,
+                                )
+                                .boxShadow(
+                                  begin: BoxShadow(
+                                      color: barColor.withValues(alpha: 0.6),
+                                      blurRadius: 8),
+                                  end: BoxShadow(
+                                      color: barColor.withValues(alpha: 0.95),
+                                      blurRadius: 16,
+                                      spreadRadius: 1),
+                                  duration: isOver ? 700.ms : 0.ms,
+                                ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Text(
-                        '${(v * 100).toStringAsFixed(1)}% of budget used',
-                        style: const TextStyle(
-                            color: Colors.white60, fontSize: 11),
+                      Row(
+                        children: [
+                          Text(
+                            '${(v * 100).toStringAsFixed(1)}% of budget used',
+                            style: TextStyle(
+                              color: isOver
+                                  ? Colors.white
+                                  : Colors.white60,
+                              fontSize: 11,
+                              fontWeight:
+                                  isOver ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                          if (isOver) ...[
+                            const SizedBox(width: 6),
+                            Icon(Icons.warning_rounded,
+                                size: 12, color: AppTheme.rose),
+                          ],
+                        ],
                       ),
                     ],
                   );
@@ -670,4 +710,39 @@ class _AlertsRow extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Overflow Stripes ────────────────────────────────────────────────────────
+// Diagonal hazard pattern drawn over the progress bar once spending exceeds
+// the monthly budget, so "full" reads as "overflowing" rather than "on track".
+class _OverflowStripes extends StatelessWidget {
+  const _OverflowStripes();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _StripePainter(),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _StripePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.22)
+      ..strokeWidth = 3;
+    const gap = 7.0;
+    for (double x = -size.height; x < size.width; x += gap) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
