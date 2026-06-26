@@ -5,7 +5,7 @@
 Take full control of your money. Finance Tracker lets you set monthly budgets per category, log expenses and income, monitor savings goals, track recurring bills, and view your financial health score — all in a clean, modern interface with full dark/light mode support.
 
 **Live App:** [finance-traking-app.netlify.app](https://finance-traking-app.netlify.app)
-| Unfortunately, netlify credits got over. So latest and after changes deployed in github.io.pages| 
+Unfortunately, netlify credits got over. So latest and after changes deployed in github.io.pages
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=flat&logo=dart&logoColor=white)
