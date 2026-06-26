@@ -35,32 +35,40 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final finance = context.read<FinanceService>();
       final auth = context.read<AuthService>();
+      debugPrint('[signin] calling signIn...');
       await auth.signIn(
             email: _emailCtrl.text.trim(),
             password: _passwordCtrl.text,
           );
+      debugPrint('[signin] signIn returned, isLoggedIn=${auth.isLoggedIn} userId=${auth.userId}');
       // Cache the user id directly from the sign-in response — Supabase's
       // currentUser getter can lag behind on web, which left loadData()
       // silently no-op-ing right after a fresh sign-in.
       finance.setUserId(auth.userId);
       // Trigger the data load directly instead of relying solely on
       // _AuthGate's auth-state listener, which can lag on web.
+      debugPrint('[signin] calling loadData...');
       await finance.loadData();
+      debugPrint('[signin] loadData finished OK');
     } on AuthException catch (e) {
+      debugPrint('[signin] AuthException: ${e.message}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.message),
             backgroundColor: AppTheme.rose,
+            duration: const Duration(seconds: 8),
           ),
         );
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[signin] unexpected error: $e\n$st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sign in failed. Check your connection and try again.'),
+            content: Text('Sign in failed: $e'),
             backgroundColor: AppTheme.rose,
+            duration: const Duration(seconds: 8),
           ),
         );
       }
