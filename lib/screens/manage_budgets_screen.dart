@@ -289,7 +289,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
   late TextEditingController _nameCtrl;
   late TextEditingController _budgetCtrl;
   IconData _selectedIcon = Icons.category;
-  Color _selectedColor = Colors.blue;
+  Color _selectedColor = const Color(0xFF22C55E);
 
   static const _iconOptions = [
     Icons.home, Icons.restaurant, Icons.directions_car,
@@ -298,10 +298,19 @@ class _CategoryDialogState extends State<_CategoryDialog> {
     Icons.fitness_center, Icons.pets, Icons.wifi, Icons.phone,
   ];
 
+  // A curated, brand-harmonious palette (instead of raw Material swatches)
+  // so categories read as a cohesive set rather than clashing primary colors.
   static const _colorOptions = [
-    Colors.blue, Colors.orange, Colors.green, Colors.red,
-    Colors.purple, Colors.pink, Colors.amber, Colors.teal,
-    Colors.indigo, Colors.cyan,
+    Color(0xFF22C55E), // green (brand)
+    Color(0xFF0EA5E9), // sky
+    Color(0xFFF59E0B), // amber
+    Color(0xFFEF4444), // rose
+    Color(0xFF8B5CF6), // violet
+    Color(0xFF14B8A6), // teal
+    Color(0xFFEC4899), // pink
+    Color(0xFF6366F1), // indigo
+    Color(0xFFF97316), // orange
+    Color(0xFF06B6D4), // cyan
   ];
 
   @override
@@ -312,7 +321,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
     _budgetCtrl = TextEditingController(
         text: widget.category?.budgetAmount.toStringAsFixed(2) ?? '');
     _selectedIcon = widget.category?.icon ?? Icons.category;
-    _selectedColor = widget.category?.color ?? Colors.blue;
+    _selectedColor = widget.category?.color ?? const Color(0xFF22C55E);
   }
 
   @override
