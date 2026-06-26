@@ -123,12 +123,16 @@ class FinanceService extends ChangeNotifier {
 
   Future<void> _saveSettings() async {
     if (_userId == null) return;
+    // Without an explicit onConflict target, Postgrest falls back to the
+    // table's primary key for the upsert's ON CONFLICT clause. If user_id
+    // isn't that primary key, Postgres can't resolve the conflict and
+    // rejects the request with a 400 — so the unique column must be named.
     await _supabase.from('user_settings').upsert({
       'user_id': _userId,
       'total_monthly_budget': _totalMonthlyBudget,
       'is_dark_mode': _isDarkMode,
       'currency': _currency,
-    });
+    }, onConflict: 'user_id');
   }
 
   Future<void> _loadCategories() async {
@@ -414,23 +418,40 @@ class FinanceService extends ChangeNotifier {
 
   // ── Budget & Settings ────────────────────────────────────────────────────
 
+  // These setters are invoked as fire-and-forget UI callbacks (e.g.
+  // SwitchListTile.onChanged), so a failed _saveSettings() would otherwise
+  // surface as an uncaught error in the browser console with no UI impact.
+  // The local state change already applied, so we just log and move on.
+
   Future<void> updateTotalBudget(double amount) async {
     _totalMonthlyBudget = amount;
     notifyListeners();
-    await _saveSettings();
+    try {
+      await _saveSettings();
+    } catch (e) {
+      debugPrint('Failed to save total budget: $e');
+    }
   }
 
   Future<void> toggleDarkMode() async {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
-    await _saveSettings();
+    try {
+      await _saveSettings();
+    } catch (e) {
+      debugPrint('Failed to save dark mode: $e');
+    }
   }
 
   Future<void> setCurrency(String code) async {
     if (!availableCurrencies.containsKey(code)) return;
     _currency = code;
     notifyListeners();
-    await _saveSettings();
+    try {
+      await _saveSettings();
+    } catch (e) {
+      debugPrint('Failed to save currency: $e');
+    }
   }
 
   // ── Reset Month ───────────────────────────────────────────────────────────
