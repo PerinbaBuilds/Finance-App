@@ -15,7 +15,18 @@ class AuthService extends ChangeNotifier {
   AuthService() {
     _user = _supabase.auth.currentUser;
     _supabase.auth.onAuthStateChange.listen((data) {
-      _user = data.session?.user;
+      // Supabase's web SDK can emit an event with a transiently null/stale
+      // session right around sign-in, before the real session settles. If we
+      // blindly copied data.session?.user every time, that transient event
+      // could race with signIn()'s explicit assignment and flip _user back
+      // to null right after a successful sign-in. Only signedOut should ever
+      // clear _user; every other event should only update it when a real
+      // user is present.
+      if (data.event == AuthChangeEvent.signedOut) {
+        _user = null;
+      } else if (data.session?.user != null) {
+        _user = data.session!.user;
+      }
       notifyListeners();
     });
   }
