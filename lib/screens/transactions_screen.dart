@@ -4,7 +4,64 @@ import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../services/finance_service.dart';
 import '../models/transaction.dart';
+import '../models/income.dart';
 import '../theme/app_theme.dart';
+
+// Unifies expense Transactions and Income entries into one ledger so both
+// show up side by side in the All Transactions list.
+class _LedgerEntry {
+  final String id;
+  final String description;
+  final double amount;
+  final DateTime date;
+  final bool isExpense;
+  final String categoryName;
+  final IconData categoryIcon;
+  final Color categoryColor;
+  final bool isIncome;
+  final String? categoryId;
+
+  const _LedgerEntry({
+    required this.id,
+    required this.description,
+    required this.amount,
+    required this.date,
+    required this.isExpense,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.categoryColor,
+    required this.isIncome,
+    this.categoryId,
+  });
+
+  factory _LedgerEntry.fromTransaction(
+      Transaction tx, String categoryName, IconData icon, Color color) {
+    return _LedgerEntry(
+      id: tx.id,
+      description: tx.description,
+      amount: tx.amount,
+      date: tx.date,
+      isExpense: tx.isExpense,
+      categoryName: categoryName,
+      categoryIcon: icon,
+      categoryColor: color,
+      isIncome: false,
+      categoryId: tx.categoryId,
+    );
+  }
+
+  factory _LedgerEntry.fromIncome(Income income) => _LedgerEntry(
+        id: income.id,
+        description: income.source,
+        amount: income.amount,
+        date: income.date,
+        isExpense: false,
+        categoryName: 'Income',
+        categoryIcon: Icons.trending_up,
+        categoryColor: AppTheme.emerald,
+        isIncome: true,
+      );
+}
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -29,28 +86,41 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     return Consumer<FinanceService>(
       builder: (context, finance, _) {
-        var txs = [...finance.transactions]
-          ..sort((a, b) => b.date.compareTo(a.date));
+        var entries = <_LedgerEntry>[
+          ...finance.transactions.map((tx) {
+            final cat = finance.categories
+                .where((c) => c.id == tx.categoryId)
+                .firstOrNull;
+            return _LedgerEntry.fromTransaction(
+              tx,
+              cat?.name ?? 'Unknown',
+              cat?.icon ?? Icons.category,
+              cat?.color ??
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            );
+          }),
+          ...finance.incomes.map(_LedgerEntry.fromIncome),
+        ]..sort((a, b) => b.date.compareTo(a.date));
 
         // Filter
         if (_filterType == 'expense') {
-          txs = txs.where((t) => t.isExpense).toList();
+          entries = entries.where((e) => e.isExpense).toList();
         } else if (_filterType == 'income') {
-          txs = txs.where((t) => !t.isExpense).toList();
+          entries = entries.where((e) => !e.isExpense).toList();
         }
 
         // Search
         if (_searchQuery.isNotEmpty) {
           final q = _searchQuery.toLowerCase();
-          txs = txs
-              .where((t) =>
-                  t.description.toLowerCase().contains(q) ||
-                  t.amount.toString().contains(q))
+          entries = entries
+              .where((e) =>
+                  e.description.toLowerCase().contains(q) ||
+                  e.amount.toString().contains(q))
               .toList();
         }
 
         // Group by date label
-        final grouped = _groupTransactions(txs, finance);
+        final grouped = _groupEntries(entries);
         final colorScheme = Theme.of(context).colorScheme;
 
         return Scaffold(
@@ -166,19 +236,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                             return _DateGroupHeader(
                                 label: item.label);
                           }
-                          final tx = item as Transaction;
-                          final cat = finance.categories
-                              .where((c) => c.id == tx.categoryId)
-                              .firstOrNull;
+                          final entry = item as _LedgerEntry;
                           return _DismissibleTile(
-                            tx: tx,
-                            categoryName: cat?.name ?? 'Unknown',
-                            categoryIcon:
-                                cat?.icon ?? Icons.category,
-                            categoryColor:
-                                cat?.color ?? colorScheme.onSurface.withValues(alpha: 0.4),
+                            entry: entry,
                             onDelete: () =>
-                                _handleDelete(context, finance, tx),
+                                _handleDelete(context, finance, entry),
                           )
                               .animate()
                               .fadeIn(
@@ -195,9 +257,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
-  List<Object> _groupTransactions(
-      List<Transaction> txs, FinanceService finance) {
-    if (txs.isEmpty) return [];
+  List<Object> _groupEntries(List<_LedgerEntry> entries) {
+    if (entries.isEmpty) return [];
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -207,9 +268,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final result = <Object>[];
     String? lastLabel;
 
-    for (final tx in txs) {
+    for (final entry in entries) {
       final txDate =
-          DateTime(tx.date.year, tx.date.month, tx.date.day);
+          DateTime(entry.date.year, entry.date.month, entry.date.day);
       String label;
       if (txDate == today) {
         label = 'Today';
@@ -218,28 +279,46 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       } else if (txDate.isAfter(weekStart)) {
         label = 'This Week';
       } else {
-        label = DateFormat('MMMM yyyy').format(tx.date);
+        label = DateFormat('MMMM yyyy').format(entry.date);
       }
 
       if (label != lastLabel) {
         result.add(_DateHeader(label));
         lastLabel = label;
       }
-      result.add(tx);
+      result.add(entry);
     }
     return result;
   }
 
   Future<void> _handleDelete(
-      BuildContext context, FinanceService finance, Transaction tx) async {
-    await finance.deleteTransaction(tx.id);
+      BuildContext context, FinanceService finance, _LedgerEntry entry) async {
+    if (entry.isIncome) {
+      await finance.deleteIncome(entry.id);
+    } else {
+      await finance.deleteTransaction(entry.id);
+    }
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Deleted "${tx.description}"'),
+          content: Text('Deleted "${entry.description}"'),
           action: SnackBarAction(
             label: 'Undo',
-            onPressed: () => finance.addTransaction(tx),
+            onPressed: () => entry.isIncome
+                ? finance.addIncome(Income(
+                    id: entry.id,
+                    source: entry.description,
+                    amount: entry.amount,
+                    date: entry.date,
+                  ))
+                : finance.addTransaction(Transaction(
+                    id: entry.id,
+                    categoryId: entry.categoryId!,
+                    description: entry.description,
+                    amount: entry.amount,
+                    date: entry.date,
+                    isExpense: entry.isExpense,
+                  )),
           ),
         ),
       );
@@ -326,17 +405,11 @@ class _FilterChip extends StatelessWidget {
 
 // ── Dismissible Tile ──────────────────────────────────────────────────────────
 class _DismissibleTile extends StatelessWidget {
-  final Transaction tx;
-  final String categoryName;
-  final IconData categoryIcon;
-  final Color categoryColor;
+  final _LedgerEntry entry;
   final VoidCallback onDelete;
 
   const _DismissibleTile({
-    required this.tx,
-    required this.categoryName,
-    required this.categoryIcon,
-    required this.categoryColor,
+    required this.entry,
     required this.onDelete,
   });
 
@@ -346,7 +419,7 @@ class _DismissibleTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Dismissible(
-      key: ValueKey(tx.id),
+      key: ValueKey(entry.id),
       direction: DismissDirection.endToStart,
       background: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -373,29 +446,29 @@ class _DismissibleTile extends StatelessWidget {
         ),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: categoryColor.withValues(alpha: 0.12),
-            child: Icon(categoryIcon, color: categoryColor, size: 20),
+            backgroundColor: entry.categoryColor.withValues(alpha: 0.12),
+            child: Icon(entry.categoryIcon, color: entry.categoryColor, size: 20),
           ),
           title: Text(
-            tx.description,
+            entry.description,
             style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
                 fontSize: 14),
           ),
           subtitle: Text(
-            '$categoryName • ${DateFormat('MMM d, yyyy').format(tx.date)}',
+            '${entry.categoryName} • ${DateFormat('MMM d, yyyy').format(entry.date)}',
             style: TextStyle(
                 fontSize: 12,
                 color: colorScheme.onSurface.withValues(alpha: 0.6)),
           ),
           trailing: Consumer<FinanceService>(
             builder: (_, finance, __) => Text(
-              tx.isExpense
-                  ? '-${finance.currencySymbol}${tx.amount.toStringAsFixed(2)}'
-                  : '+${finance.currencySymbol}${tx.amount.toStringAsFixed(2)}',
+              entry.isExpense
+                  ? '-${finance.currencySymbol}${entry.amount.toStringAsFixed(2)}'
+                  : '+${finance.currencySymbol}${entry.amount.toStringAsFixed(2)}',
               style: TextStyle(
-                color: tx.isExpense ? AppTheme.rose : AppTheme.emerald,
+                color: entry.isExpense ? AppTheme.rose : AppTheme.emerald,
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
               ),
