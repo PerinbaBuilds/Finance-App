@@ -21,6 +21,13 @@
   <meta name="description" content="Finance Tracker — track spending, manage budgets, and hit your savings goals.">
   <meta name="theme-color" content="#22C55E">
 
+  <!-- GitHub Pages doesn't set Cache-Control on its own, and browsers were
+       caching index.html long enough that fresh deploys never reached
+       returning users. Force every load to revalidate against the server. -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
