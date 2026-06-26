@@ -140,19 +140,26 @@ class _FloatingNavBar extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [Color(0xFF1E3D2C), Color(0xFF0C1B12)],
                 )
-              : const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFECFDF5), Color(0xFFF8FFFE)],
-                ),
+              : null,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? null
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppTheme.radiusXl + 4),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
                 ? const Color(0xFF2D5A3D)
-                : const Color(0xFFD1FAE5),
+                : const Color(0xFFC9E6D4),
             width: 1,
           ),
-          boxShadow: AppTheme.navShadow,
+          boxShadow: Theme.of(context).brightness == Brightness.dark
+              ? AppTheme.navShadow
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.10),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -190,7 +197,7 @@ class _FloatingNavBar extends StatelessWidget {
                         ],
                       )
                     : Icon(item.icon,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45), size: 22),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55), size: 22),
               ),
             );
           }),

@@ -42,7 +42,7 @@ class _BudgetChartState extends State<BudgetChart> {
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -53,7 +53,7 @@ class _BudgetChartState extends State<BudgetChart> {
               spreadRadius: 2,
             ),
         ],
-        border: Border.all(color: scheme.outline.withValues(alpha: isDark ? 1.0 : 0.4)),
+        border: Border.all(color: scheme.outline.withValues(alpha: isDark ? 1.0 : 0.5)),
       ),
       padding: const EdgeInsets.all(AppTheme.space20),
       child: Column(

@@ -41,11 +41,11 @@ class _BudgetCategoryCardState extends State<BudgetCategoryCard> {
         color: scheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         border: Border.all(
-          color: scheme.outline.withValues(alpha: isDark ? 1.0 : 0.4),
+          color: scheme.outline.withValues(alpha: isDark ? 1.0 : 0.5),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.08),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),

@@ -345,6 +345,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusSm)),
         behavior: SnackBarBehavior.floating,
+        insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 88),
       ),
     );
   }
@@ -352,9 +353,10 @@ class AppTheme {
   // ── Light Theme ──────────────────────────────────────────────────────────────
   static ThemeData get light {
     const Color lPrimary = Color(0xFF16A34A);
-    const Color lBackground = Color(0xFFF0FDF4);
+    const Color lBackground = Color(0xFFEAF3ED);
     const Color lSurface = Color(0xFFFFFFFF);
-    const Color lBorder = Color(0xFFD1FAE5);
+    const Color lSurfaceVariant = Color(0xFFF4F9F6);
+    const Color lBorder = Color(0xFFC9E6D4);
     const Color lText = Color(0xFF052E16);
     const Color lTextSec = Color(0xFF166534);
     final textTheme = _textTheme(lText, lTextSec);
@@ -456,6 +458,16 @@ class AppTheme {
           side: const BorderSide(color: lBorder),
         ),
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: lText,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        actionTextColor: primaryLight,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusSm)),
+        behavior: SnackBarBehavior.floating,
+        insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 88),
+      ),
+      listTileTheme: const ListTileThemeData(tileColor: lSurfaceVariant),
     );
   }
 }
