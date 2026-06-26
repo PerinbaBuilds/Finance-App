@@ -61,7 +61,14 @@ class FinanceService extends ChangeNotifier {
   double get nextMonthTotal =>
       _nextMonthBudgets.values.fold(0, (sum, v) => sum + v);
 
-  String? get _userId => _supabase.auth.currentUser?.id;
+  String? _cachedUserId;
+
+  // Falls back to the SDK getter for cases (app resume, deep links) where
+  // setUserId() hasn't been called explicitly, but prefers the cached value
+  // since Supabase's currentUser can lag behind a just-completed sign-in.
+  String? get _userId => _cachedUserId ?? _supabase.auth.currentUser?.id;
+
+  void setUserId(String? id) => _cachedUserId = id;
 
   Future<void> loadData() async {
     if (_userId == null) return;
@@ -542,6 +549,7 @@ class FinanceService extends ChangeNotifier {
   }
 
   void clearData() {
+    _cachedUserId = null;
     _categories = [];
     _transactions = [];
     _incomes = [];

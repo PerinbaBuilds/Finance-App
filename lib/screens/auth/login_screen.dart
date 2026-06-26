@@ -34,10 +34,15 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
     try {
       final finance = context.read<FinanceService>();
-      await context.read<AuthService>().signIn(
+      final auth = context.read<AuthService>();
+      await auth.signIn(
             email: _emailCtrl.text.trim(),
             password: _passwordCtrl.text,
           );
+      // Cache the user id directly from the sign-in response — Supabase's
+      // currentUser getter can lag behind on web, which left loadData()
+      // silently no-op-ing right after a fresh sign-in.
+      finance.setUserId(auth.userId);
       // Trigger the data load directly instead of relying solely on
       // _AuthGate's auth-state listener, which can lag on web.
       await finance.loadData();

@@ -103,7 +103,9 @@ class _AuthGateState extends State<_AuthGate> {
         // Load finance data whenever a user session becomes active.
         // LoginScreen cannot reliably call loadData (widget may unmount first).
         if (!_isRecovery && data.session != null) {
-          await context.read<FinanceService>().loadData();
+          final finance = context.read<FinanceService>();
+          finance.setUserId(data.session!.user.id);
+          await finance.loadData();
         }
       }
     });
@@ -125,8 +127,11 @@ class _AuthGateState extends State<_AuthGate> {
     }
 
     if (!mounted) return;
-    if (context.read<AuthService>().isLoggedIn && !_isRecovery) {
-      await context.read<FinanceService>().loadData();
+    final auth = context.read<AuthService>();
+    if (auth.isLoggedIn && !_isRecovery) {
+      final finance = context.read<FinanceService>();
+      finance.setUserId(auth.userId);
+      await finance.loadData();
     }
     if (mounted) setState(() => _initialized = true);
   }

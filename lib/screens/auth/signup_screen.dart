@@ -35,13 +35,16 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      await context.read<AuthService>().signUp(
+      final auth = context.read<AuthService>();
+      await auth.signUp(
             email: _emailCtrl.text.trim(),
             password: _passwordCtrl.text,
             fullName: _nameCtrl.text.trim(),
           );
       if (mounted) {
-        await context.read<FinanceService>().loadData();
+        final finance = context.read<FinanceService>();
+        finance.setUserId(auth.userId);
+        await finance.loadData();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Account created! Check your email to verify.'),
