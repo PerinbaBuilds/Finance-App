@@ -74,8 +74,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final border = scheme.outline.withValues(alpha: isDark ? 1.0 : 0.5);
     return Scaffold(
-      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -110,22 +112,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               const SizedBox(height: 22),
 
-              const Text(
+              Text(
                 'Set New Password',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: scheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Choose a strong password for your account.',
                 textAlign: TextAlign.center,
-                style:
-                    TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                style: TextStyle(
+                    color: scheme.onSurface.withValues(alpha: 0.6),
+                    fontSize: 14),
               ),
 
               const SizedBox(height: 40),
@@ -183,22 +186,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
+                  color: scheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.border),
+                  border: Border.all(color: border),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Password requirements:',
                         style: TextStyle(
-                            color: AppTheme.textSecondary,
+                            color: scheme.onSurface.withValues(alpha: 0.6),
                             fontSize: 12,
                             fontWeight: FontWeight.w600)),
-                    SizedBox(height: 6),
-                    _Req(text: 'At least 6 characters'),
-                    _Req(text: 'Mix of letters and numbers recommended'),
-                    _Req(text: 'Avoid using your name or email'),
+                    const SizedBox(height: 6),
+                    _Req(text: 'At least 6 characters', scheme: scheme),
+                    _Req(
+                        text: 'Mix of letters and numbers recommended',
+                        scheme: scheme),
+                    _Req(text: 'Avoid using your name or email', scheme: scheme),
                   ],
                 ),
               ),
@@ -229,20 +234,23 @@ class _PasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final border = scheme.outline.withValues(alpha: isDark ? 1.0 : 0.5);
     return TextField(
       controller: controller,
       obscureText: obscure,
       autofillHints: const [AutofillHints.newPassword],
-      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
+      style: TextStyle(color: scheme.onSurface, fontSize: 15),
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
         labelText: label,
         labelStyle:
-            const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-        prefixIcon: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14),
+            TextStyle(color: scheme.onSurface.withValues(alpha: 0.6), fontSize: 14),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Icon(Icons.lock_outline_rounded,
-              color: AppTheme.textSecondary, size: 20),
+              color: scheme.onSurface.withValues(alpha: 0.6), size: 20),
         ),
         suffixIcon: Padding(
           padding: const EdgeInsets.only(right: 14),
@@ -252,22 +260,22 @@ class _PasswordField extends StatelessWidget {
               obscure
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
-              color: AppTheme.textSecondary,
+              color: scheme.onSurface.withValues(alpha: 0.6),
               size: 20,
             ),
           ),
         ),
         filled: true,
-        fillColor: AppTheme.surface,
+        fillColor: scheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.border),
+          borderSide: BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.border),
+          borderSide: BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -280,7 +288,8 @@ class _PasswordField extends StatelessWidget {
 
 class _Req extends StatelessWidget {
   final String text;
-  const _Req({required this.text});
+  final ColorScheme scheme;
+  const _Req({required this.text, required this.scheme});
 
   @override
   Widget build(BuildContext context) {
@@ -292,8 +301,9 @@ class _Req extends StatelessWidget {
               size: 13, color: AppTheme.emerald),
           const SizedBox(width: 6),
           Text(text,
-              style: const TextStyle(
-                  color: AppTheme.textSecondary, fontSize: 12)),
+              style: TextStyle(
+                  color: scheme.onSurface.withValues(alpha: 0.6),
+                  fontSize: 12)),
         ],
       ),
     );

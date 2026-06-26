@@ -63,8 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -104,22 +105,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 22),
 
-                const Text(
+                Text(
                   'Finance Tracker',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                    color: scheme.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Track smarter. Save better.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppTheme.textSecondary,
+                    color: scheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -150,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       _obscure
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: AppTheme.textSecondary,
+                      color: scheme.onSurface.withValues(alpha: 0.6),
                       size: 20,
                     ),
                   ),
@@ -208,16 +209,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 Row(
                   children: [
-                    Expanded(child: Divider(color: AppTheme.border)),
+                    Expanded(
+                        child: Divider(
+                            color: scheme.outline
+                                .withValues(alpha: isDark ? 1.0 : 0.5))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: Text(
                         'or',
                         style: TextStyle(
-                            color: AppTheme.textMuted, fontSize: 13),
+                            color: scheme.onSurface.withValues(alpha: 0.4),
+                            fontSize: 13),
                       ),
                     ),
-                    Expanded(child: Divider(color: AppTheme.border)),
+                    Expanded(
+                        child: Divider(
+                            color: scheme.outline
+                                .withValues(alpha: isDark ? 1.0 : 0.5))),
                   ],
                 ),
 
@@ -226,10 +234,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       "Don't have an account? ",
                       style: TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 14),
+                          color: scheme.onSurface.withValues(alpha: 0.6),
+                          fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.pushReplacement(
@@ -259,7 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// ── Shared dark-themed input field ────────────────────────────────────────────
+// ── Shared auth input field — adapts to light/dark theme ────────────────────
 class _AuthField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -281,18 +290,21 @@ class _AuthField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final border = scheme.outline.withValues(alpha: isDark ? 1.0 : 0.5);
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
+      style: TextStyle(color: scheme.onSurface, fontSize: 15),
       decoration: InputDecoration(
         labelText: label,
         labelStyle:
-            const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+            TextStyle(color: scheme.onSurface.withValues(alpha: 0.6), fontSize: 14),
         prefixIcon: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Icon(icon, color: AppTheme.textSecondary, size: 20),
+          child: Icon(icon, color: scheme.onSurface.withValues(alpha: 0.6), size: 20),
         ),
         suffixIcon: suffixIcon != null
             ? Padding(
@@ -301,16 +313,16 @@ class _AuthField extends StatelessWidget {
               )
             : null,
         filled: true,
-        fillColor: AppTheme.surface,
+        fillColor: scheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.border),
+          borderSide: BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppTheme.border),
+          borderSide: BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

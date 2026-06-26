@@ -147,8 +147,8 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppTheme.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,12 +167,12 @@ class _SplashScreen extends StatelessWidget {
                 .animate(onPlay: (c) => c.repeat(reverse: true))
                 .scaleXY(begin: 1.0, end: 1.06, duration: 1100.ms, curve: AppTheme.motionCurve),
             const SizedBox(height: 28),
-            const Text(
+            Text(
               'Finance Tracker',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+                color: scheme.onSurface,
                 letterSpacing: -0.3,
               ),
             ),
@@ -181,7 +181,7 @@ class _SplashScreen extends StatelessWidget {
               'Loading your dashboard…',
               style: TextStyle(
                 fontSize: 13,
-                color: AppTheme.textPrimary.withValues(alpha: 0.55),
+                color: scheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
             const SizedBox(height: 28),
