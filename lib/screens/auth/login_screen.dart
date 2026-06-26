@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../services/auth_service.dart';
 import '../../services/finance_service.dart';
 import '../../theme/app_theme.dart';
+import '../home_screen.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -50,6 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('[signin] calling loadData...');
       await finance.loadData();
       debugPrint('[signin] loadData finished OK');
+      // _AuthGate's rebuild is driven by Provider's notifyListeners(), which
+      // depends on a dependency subscription that can go stale across the
+      // Consumer<FinanceService> rebuilds triggered above — leaving this
+      // screen on-screen even though auth succeeded. Navigate explicitly so
+      // the transition never depends on that chain firing correctly.
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+      }
     } on AuthException catch (e) {
       debugPrint('[signin] AuthException: ${e.message}');
       if (mounted) {

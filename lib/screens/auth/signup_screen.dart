@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../services/auth_service.dart';
 import '../../services/finance_service.dart';
 import '../../theme/app_theme.dart';
+import '../home_screen.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -42,15 +43,27 @@ class _SignupScreenState extends State<SignupScreen> {
             fullName: _nameCtrl.text.trim(),
           );
       if (mounted) {
-        final finance = context.read<FinanceService>();
-        finance.setUserId(auth.userId);
-        await finance.loadData();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account created! Check your email to verify.'),
-            backgroundColor: AppTheme.emerald,
-          ),
-        );
+        // If email confirmation is disabled in Supabase, signUp() returns an
+        // already-active session — same navigation race as sign-in, so
+        // navigate explicitly instead of waiting on _AuthGate's rebuild.
+        if (auth.isLoggedIn) {
+          final finance = context.read<FinanceService>();
+          finance.setUserId(auth.userId);
+          await finance.loadData();
+          if (mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created! Check your email to verify.'),
+              backgroundColor: AppTheme.emerald,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
