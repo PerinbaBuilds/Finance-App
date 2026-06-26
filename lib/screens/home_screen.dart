@@ -46,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     _NavItem(
       label: 'Insights',
-      icon: Icons.bar_chart_outlined,
-      selectedIcon: Icons.bar_chart,
+      icon: Icons.lightbulb_outline,
+      selectedIcon: Icons.lightbulb,
     ),
     _NavItem(
       label: 'History',
