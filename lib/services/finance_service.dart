@@ -70,7 +70,19 @@ class FinanceService extends ChangeNotifier {
 
   void setUserId(String? id) => _cachedUserId = id;
 
-  Future<void> loadData() async {
+  Future<void>? _inFlightLoad;
+
+  // A sign-in triggers loadData() from two places: the screen that submitted
+  // the form, and _AuthGate's auth-state listener reacting to the same
+  // signedIn event. Without this guard both run concurrently and double
+  // every network request.
+  Future<void> loadData() {
+    return _inFlightLoad ??= _loadDataInternal().whenComplete(() {
+      _inFlightLoad = null;
+    });
+  }
+
+  Future<void> _loadDataInternal() async {
     if (_userId == null) return;
     _isLoading = true;
     notifyListeners();
