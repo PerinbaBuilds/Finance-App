@@ -4,13 +4,14 @@
 
 Take full control of your money. Finance Tracker lets you set monthly budgets per category, log expenses and income, monitor savings goals, track recurring bills, and view your financial health score — all in a clean, modern interface with full dark/light mode support.
 
-**Live App:** [finance-traking-app.netlify.app](https://finance-traking-app.netlify.app)
-Unfortunately, netlify credits got over. So latest and after changes deployed in github.io.pages
+**Live App:** [perinbabuilds.github.io/Finance-App](https://perinbabuilds.github.io/Finance-App/)
+
+This app was originally hosted on [Netlify](https://finance-traking-app.netlify.app), but the free tier's build credits ran out, so it's now deployed on GitHub Pages instead. The Netlify link above is kept for reference and may no longer reflect the latest build — use the GitHub Pages link for the current version.
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=flat&logo=dart&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-222222?style=flat&logo=github&logoColor=white)
 
 ---
 
@@ -41,7 +42,8 @@ Unfortunately, netlify credits got over. So latest and after changes deployed in
 - Row Level Security — per-user data isolation
 
 **Hosting**
-- [Netlify](https://netlify.com) — Static web deployment
+- [GitHub Pages](https://pages.github.com) — Static web deployment (built into `docs/` and served from the `main` branch)
+- Previously hosted on [Netlify](https://netlify.com) until its free build credits ran out
 
 ---
 
